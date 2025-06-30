@@ -16,11 +16,10 @@ export default async function handler(req, res) {
     const pdfBuffer = Buffer.from(req.body.file, 'base64');
     const originalPdf = await PDFDocument.load(pdfBuffer);
 
-    const copiedPages = await originalPdf.copyPages(originalPdf, [0]);
-    const [page] = copiedPages;
+    const [copiedPage] = await originalPdf.copyPages(originalPdf, [0]);
 
     const newPdf = await PDFDocument.create();
-    newPdf.addPage(page); // ✅ now properly copied
+    newPdf.addPage(copiedPage);
 
     const singlePagePdfBytes = await newPdf.save();
 
