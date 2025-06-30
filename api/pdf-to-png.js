@@ -1,4 +1,3 @@
-import { readFileSync } from 'fs';
 import { PDFDocument } from 'pdf-lib';
 import sharp from 'sharp';
 
@@ -15,13 +14,15 @@ export default async function handler(req, res) {
 
   try {
     const pdfBuffer = Buffer.from(req.body.file, 'base64');
-    const pdfDoc = await PDFDocument.load(pdfBuffer);
-    const [page] = await pdfDoc.copyPages(pdfDoc, [0]);
-    const newPdf = await PDFDocument.create();
-    newPdf.addPage(page);
-    const singlePagePdf = await newPdf.save();
+    const originalPdf = await PDFDocument.load(pdfBuffer);
+    const [page] = await originalPdf.copyPages(originalPdf, [0]); // ✅ copy from self
 
-    const imageBuffer = await sharp(singlePagePdf)
+    const newPdf = await PDFDocument.create();
+    newPdf.addPage(page); // ✅ now from same doc
+
+    const singlePagePdfBytes = await newPdf.save();
+
+    const imageBuffer = await sharp(singlePagePdfBytes)
       .png()
       .toBuffer();
 
